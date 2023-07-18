@@ -5,7 +5,7 @@ const app = express();
 
 // Routes
 const adminRouter = require('./routes/admin/admin.router');
-
+const notificationRouter = require('./routes/notifications/notification.router');
 // middlewares
 // app.use(cors({
 //     origin: 'http://localhost:9001'
@@ -15,5 +15,6 @@ const adminRouter = require('./routes/admin/admin.router');
 app.use(logger('dev'));
 app.use(express.json());
 app.use('/admin', adminRouter);
+app.use('/admin/notifications', notificationRouter);
 
 module.exports = app;

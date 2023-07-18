@@ -11,6 +11,10 @@ const notificationSchema = mongoose.Schema({
         required: true,
         minlength: 3,
     },
+    image: {
+        data: Buffer,
+        contentType: String,
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -18,4 +22,4 @@ const notificationSchema = mongoose.Schema({
     },
 }, { timestamps: true });
 
-const Notification = mongoose.model('Notification', notificationSchema);
+modules.exports = mongoose.model('Notification', notificationSchema);
