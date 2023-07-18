@@ -30,4 +30,32 @@ router.post('/createNotification', requireAuth, upload.single('image'), async (r
     }
 });
 
+router.get('/getAllNotifications', async (req, res) => {
+    try {
+        const notifications = await Notification.find();
+
+        const notificationsWithImages = notifications.map((notification) => {
+            const imageBuffer = Buffer.from(notification.image.data);
+            const imageWebSafe = `data:${notification.image.contentType};base64,${imageBuffer.toString('base64')}`;
+
+            // Create a new object with notification data and the image URL
+            return {
+                _id: notification._id,
+                title: notification.title,
+                body: notification.body,
+                userId: notification.userId,
+                image: imageWebSafe,
+                createdAt: notification.createdAt,
+                updatedAt: notification.updatedAt,
+            };
+        });
+
+        res.status(200).json({ notifications: notificationsWithImages });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+
 module.exports = router;
