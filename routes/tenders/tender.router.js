@@ -5,9 +5,9 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 // Models
-import Tender from '../../models/tender/tender.model';
+const Tender = require('../../models/tender/tender.model');
 
-import { requireAuth } from '../../middlewares/auth/authMiddleware';
+const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 
 router.post('/addTender', requireAuth, upload.single('image'), async (req, res) => {
@@ -75,42 +75,12 @@ router.get('/getAllTenders', async (req, res) => {
     }
 });
 
-router.get('/getTender/:id', async (req, res) => {
-    try {
-        const tender = await Tender.findById(req.params.id);
-
-        if (tender) {
-            const imageBuffer = Buffer.from(tender.image.data);
-            const imageWebSafe = `data:${tender.image.contentType};base64,${imageBuffer.toString('base64')}`;
-
-            const tenderWithImage = {
-                _id: tender._id,
-                title: tender.title,
-                body: tender.body,
-                userId: tender.userId,
-                tenderDate: tender.tenderDate,
-                image: imageWebSafe,
-                createdAt: tender.createdAt,
-                updatedAt: tender.updatedAt,
-            };
-
-            res.status(200).json({ tender: tenderWithImage });
-        }
-        else {
-            res.status(404).json({ error: 'Tender not found' });
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Something went wrong' });
-    }
-});
-
 router.delete('/deleteTender/:id', requireAuth, async (req, res) => {
     try {
         const tender = await Tender.findById(req.params.id);
 
         if (tender) {
-            await tender.remove();
+            await Tender.findByIdAndDelete(req.params.id);
             res.status(200).json({ message: 'Tender deleted successfully' });
         }
         else {
@@ -128,9 +98,9 @@ router.put('/updateTender/:id', requireAuth, upload.single('image'), async (req,
         const tender = await Tender.findById(req.params.id);
 
         if (tender) {
-            tender.title = title;
-            tender.body = body;
-            tender.tenderDate = tenderDate;
+            title ? tender.title = title : null;
+            body ? tender.body = body : null;
+            tenderDate ? tender.tenderDate = tenderDate : null;
             if (req.file) {
                 tender.image.data = req.file.buffer;
                 tender.image.contentType = req.file.mimetype;
@@ -147,3 +117,5 @@ router.put('/updateTender/:id', requireAuth, upload.single('image'), async (req,
         res.status(500).json({ error: 'Something went wrong' });
     }
 });
+
+module.exports = router;
