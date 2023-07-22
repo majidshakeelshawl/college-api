@@ -9,10 +9,10 @@ const notificationRouter = require('./routes/notifications/notification.router')
 const tenderRouter = require('./routes/tenders/tender.router');
 const eventRouter = require('./routes/events/event.router');
 // middlewares
-// app.use(cors({
-//     origin: 'http://localhost:9001'
-// }
-// ));
+app.use(cors({
+    origin: 'http://localhost:2001'
+}
+));
 
 app.use(logger('dev'));
 app.use(express.json());
