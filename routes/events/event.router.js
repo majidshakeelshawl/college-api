@@ -88,6 +88,62 @@ router.get('/getAllEvents', async (req, res) => {
     }
 });
 
+router.get('/getEvent/:eventId', async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.eventId);
+
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        const eventData = {
+            _id: event._id,
+            title: event.title,
+            body: event.body,
+            userId: event.userId,
+            createdAt: event.createdAt,
+            updatedAt: event.updatedAt,
+        };
+
+        if (event.image.data !== undefined && event.image.data !== null) {
+            const imageBuffer = Buffer.from(event.image.data);
+            const imageWebSafe = `data:${event.image.contentType};base64,${imageBuffer.toString('base64')}`;
+            eventData.image = imageWebSafe;
+        }
+
+        if (event.video.data !== undefined && event.video.data !== null) {
+            const videoBuffer = Buffer.from(event.video.data);
+            const videoWebSafe = `data:${event.video.contentType};base64,${videoBuffer.toString('base64')}`;
+            eventData.video = videoWebSafe;
+        }
+
+        res.status(200).json({ event: eventData });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+
+router.delete('/deleteEvent/:eventId', requireAuth, async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.eventId);
+
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
+        await Event.findByIdAndDelete(req.params.eventId);
+
+        res.status(200).json({ message: 'Event deleted successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong' });
+    }
+});
+
+
+
 module.exports = router;
 
 
