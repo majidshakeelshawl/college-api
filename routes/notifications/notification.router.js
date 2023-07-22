@@ -57,5 +57,21 @@ router.get('/getAllNotifications', async (req, res) => {
     }
 });
 
+// delete notification api
+router.delete('/deleteNotification/:id', requireAuth, async (req, res) => {
+    try {
+        const notification = await Notification.findById(req.params.id);
+        if (!notification) {
+            return res.status(404).json({ error: 'Notification not found' });
+        }
+        else {
+            await Notification.findByIdAndDelete(req.params.id);
+            res.status(200).json({ message: 'Notification deleted successfully' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
+    }
+});
 
 module.exports = router;
