@@ -11,16 +11,16 @@ const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 router.post('/createNotification', requireAuth, upload.single('image'), async (req, res) => {
     const { title, body } = req.body;
-    const userId = req.user._id; // Assuming you're using a middleware to attach the logged-in user to the request
-
     try {
         const notification = new Notification({ title, body, userId: req.user.userId });
         if (req.file) {
-            // If an image is uploaded, set the image data and content type
             notification.image.data = req.file.buffer;
             notification.image.contentType = req.file.mimetype;
         }
-
+        else {
+            notification.image.data = null;
+            notification.image.contentType = null;
+        }
         await notification.save();
 
         res.status(201).json({ message: 'Notification created successfully' });
@@ -35,29 +35,43 @@ router.get('/getAllNotifications', async (req, res) => {
         const notifications = await Notification.find();
 
         const notificationsWithImages = notifications.map((notification) => {
-            const imageBuffer = Buffer.from(notification.image.data);
-            const imageWebSafe = `data:${notification.image.contentType};base64,${imageBuffer.toString('base64')}`;
+            console.log("NOT: ", notification);
+            console.log("IMAGE ERROR: ", notification.image.data)
+            if (notification.image.data !== undefined && notification.image.data !== null) {
+                const imageBuffer = Buffer.from(notification.image.data);
+                const imageWebSafe = `data:${notification.image.contentType};base64,${imageBuffer.toString('base64')}`;
 
-            // Create a new object with notification data and the image URL
-            return {
-                _id: notification._id,
-                title: notification.title,
-                body: notification.body,
-                userId: notification.userId,
-                image: imageWebSafe,
-                createdAt: notification.createdAt,
-                updatedAt: notification.updatedAt,
-            };
+                // Create a new object with notification data and the image URL
+                return {
+                    _id: notification._id,
+                    title: notification.title,
+                    body: notification.body,
+                    userId: notification.userId,
+                    image: imageWebSafe,
+                    createdAt: notification.createdAt,
+                    updatedAt: notification.updatedAt,
+                };
+            }
+            else {
+                return {
+                    _id: notification._id,
+                    title: notification.title,
+                    body: notification.body,
+                    userId: notification.userId,
+                    image: null,
+                    createdAt: notification.createdAt,
+                    updatedAt: notification.updatedAt,
+                };
+            }
         });
 
         res.status(200).json({ notifications: notificationsWithImages });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Something went wrong' });
+        res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
     }
 });
 
-// delete notification api
 router.delete('/deleteNotification/:id', requireAuth, async (req, res) => {
     try {
         const notification = await Notification.findById(req.params.id);
@@ -73,5 +87,30 @@ router.delete('/deleteNotification/:id', requireAuth, async (req, res) => {
         res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
     }
 });
+
+router.put('/updateNotification/:id', requireAuth, upload.single('image'), async (req, res) => {
+    try {
+        const notification = await Notification.findById(req.params.id);
+        if (!notification) {
+            return res.status(404).json({ error: 'Notification not found' });
+        }
+        else {
+            const { title, body } = req.body;
+            title ? notification.title = title : null;
+            body ? notification.body = body : null;
+            if (req.file) {
+                // If an image is uploaded, set the image data and content type
+                notification.image.data = req.file.buffer;
+                notification.image.contentType = req.file.mimetype;
+            }
+            await notification.save();
+            res.status(200).json({ message: 'Notification updated successfully' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
+    }
+});
+
 
 module.exports = router;
