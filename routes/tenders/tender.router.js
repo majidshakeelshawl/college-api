@@ -11,9 +11,9 @@ const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 
 router.post('/addTender', requireAuth, upload.single('image'), async (req, res) => {
-    const { title, body, tenderDate } = req.body;
+    const { title, body, tenderDate, videoURL } = req.body;
     try {
-        const tender = new Tender({ title, body, tenderDate, userId: req.user.userId });
+        const tender = new Tender({ title, body, tenderDate, userId: req.user.userId, videoURL });
         if (req.file) {
             tender.image.data = req.file.buffer;
             tender.image.contentType = req.file.mimetype;
@@ -52,6 +52,7 @@ router.get('/getAllTenders', async (req, res) => {
                     image: imageWebSafe,
                     createdAt: tender.createdAt,
                     updatedAt: tender.updatedAt,
+                    videoURL: tender.videoURL,
                 };
             }
             else {
@@ -64,6 +65,7 @@ router.get('/getAllTenders', async (req, res) => {
                     image: null,
                     createdAt: tender.createdAt,
                     updatedAt: tender.updatedAt,
+                    videoURL: tender.videoURL,
                 };
             }
         });
@@ -93,7 +95,7 @@ router.delete('/deleteTender/:id', requireAuth, async (req, res) => {
 });
 
 router.put('/updateTender/:id', requireAuth, upload.single('image'), async (req, res) => {
-    const { title, body, tenderDate } = req.body;
+    const { title, body, tenderDate, videoURL } = req.body;
     try {
         const tender = await Tender.findById(req.params.id);
 
@@ -101,6 +103,7 @@ router.put('/updateTender/:id', requireAuth, upload.single('image'), async (req,
             title ? tender.title = title : null;
             body ? tender.body = body : null;
             tenderDate ? tender.tenderDate = tenderDate : null;
+            videoURL ? tender.videoURL = videoURL : null;
             if (req.file) {
                 tender.image.data = req.file.buffer;
                 tender.image.contentType = req.file.mimetype;
