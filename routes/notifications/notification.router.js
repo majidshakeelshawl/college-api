@@ -10,9 +10,9 @@ const Notification = require('../../models/notification/notification.model');
 const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 router.post('/createNotification', requireAuth, upload.single('image'), async (req, res) => {
-    const { title, body } = req.body;
+    const { title, body, videoURL } = req.body;
     try {
-        const notification = new Notification({ title, body, userId: req.user.userId });
+        const notification = new Notification({ title, body, userId: req.user.userId, videoURL });
         if (req.file) {
             notification.image.data = req.file.buffer;
             notification.image.contentType = req.file.mimetype;
@@ -50,6 +50,7 @@ router.get('/getAllNotifications', async (req, res) => {
                     image: imageWebSafe,
                     createdAt: notification.createdAt,
                     updatedAt: notification.updatedAt,
+                    videoURL: notification.videoURL,
                 };
             }
             else {
@@ -61,6 +62,7 @@ router.get('/getAllNotifications', async (req, res) => {
                     image: null,
                     createdAt: notification.createdAt,
                     updatedAt: notification.updatedAt,
+                    videoURL: notification.videoURL,
                 };
             }
         });
@@ -98,6 +100,7 @@ router.put('/updateNotification/:id', requireAuth, upload.single('image'), async
             const { title, body } = req.body;
             title ? notification.title = title : null;
             body ? notification.body = body : null;
+            videoURL ? notification.videoURL = videoURL : null;
             if (req.file) {
                 // If an image is uploaded, set the image data and content type
                 notification.image.data = req.file.buffer;
