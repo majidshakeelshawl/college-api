@@ -97,7 +97,7 @@ router.put('/updateNotification/:id', requireAuth, upload.single('image'), async
             return res.status(404).json({ error: 'Notification not found' });
         }
         else {
-            const { title, body } = req.body;
+            const { title, body, videoURL } = req.body;
             title ? notification.title = title : null;
             body ? notification.body = body : null;
             videoURL ? notification.videoURL = videoURL : null;
