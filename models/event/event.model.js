@@ -15,9 +15,8 @@ const eventSchema = mongoose.Schema({
         data: Buffer,
         contentType: String,
     },
-    video: {
-        data: Buffer,
-        contentType: String,
+    videoURL: {
+        type: String,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

@@ -18,11 +18,11 @@ const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 router.post('/addEvent',
     requireAuth,
-    upload.fields([{ name: 'image', maxCount: 1 }, { name: 'video', maxCount: 1 }]),
+    upload.fields([{ name: 'image', maxCount: 1 }]),
     async (req, res) => {
-        const { title, body } = req.body;
+        const { title, body, videoURL } = req.body;
         try {
-            const event = new Event({ title, body, userId: req.user.userId });
+            const event = new Event({ title, body, userId: req.user.userId, videoURL });
 
             // Check if an image file was uploaded
             if (req.files && req.files.image && req.files.image[0]) {
@@ -31,15 +31,6 @@ router.post('/addEvent',
             } else {
                 event.image.data = null;
                 event.image.contentType = null;
-            }
-
-            // Check if a video file was uploaded
-            if (req.files && req.files.video && req.files.video[0]) {
-                event.video.data = req.files.video[0].buffer;
-                event.video.contentType = req.files.video[0].mimetype;
-            } else {
-                event.video.data = null;
-                event.video.contentType = null;
             }
 
             await event.save();
@@ -64,18 +55,13 @@ router.get('/getAllEvents', async (req, res) => {
                 userId: event.userId,
                 createdAt: event.createdAt,
                 updatedAt: event.updatedAt,
+                videoURL: event.videoURL,
             };
 
             if (event.image.data !== undefined && event.image.data !== null) {
                 const imageBuffer = Buffer.from(event.image.data);
                 const imageWebSafe = `data:${event.image.contentType};base64,${imageBuffer.toString('base64')}`;
                 eventData.image = imageWebSafe;
-            }
-
-            if (event.video.data !== undefined && event.video.data !== null) {
-                const videoBuffer = Buffer.from(event.video.data);
-                const videoWebSafe = `data:${event.video.contentType};base64,${videoBuffer.toString('base64')}`;
-                eventData.video = videoWebSafe;
             }
 
             return eventData;
@@ -103,18 +89,13 @@ router.get('/getEvent/:eventId', async (req, res) => {
             userId: event.userId,
             createdAt: event.createdAt,
             updatedAt: event.updatedAt,
+            videoURL: event.videoURL,
         };
 
         if (event.image.data !== undefined && event.image.data !== null) {
             const imageBuffer = Buffer.from(event.image.data);
             const imageWebSafe = `data:${event.image.contentType};base64,${imageBuffer.toString('base64')}`;
             eventData.image = imageWebSafe;
-        }
-
-        if (event.video.data !== undefined && event.video.data !== null) {
-            const videoBuffer = Buffer.from(event.video.data);
-            const videoWebSafe = `data:${event.video.contentType};base64,${videoBuffer.toString('base64')}`;
-            eventData.video = videoWebSafe;
         }
 
         res.status(200).json({ event: eventData });
@@ -142,7 +123,37 @@ router.delete('/deleteEvent/:eventId', requireAuth, async (req, res) => {
     }
 });
 
+router.put('/updateEvent/:eventId', requireAuth,
+    upload.fields([{ name: 'image', maxCount: 1 }]),
+    async (req, res) => {
+        const { title, body, videoURL } = req.body;
+        try {
+            const event = await Event.findById(req.params.eventId);
 
+            if (!event) {
+                return res.status(404).json({ error: 'Event not found' });
+            }
+            if (title)
+                event.title = title;
+            if (body)
+                event.body = body;
+            if (videoURL)
+                event.videoURL = videoURL;
+
+            // Check if an image file was uploaded
+            if (req.files && req.files.image && req.files.image[0]) {
+                event.image.data = req.files.image[0].buffer;
+                event.image.contentType = req.files.image[0].mimetype
+            }
+
+            await event.save();
+
+            res.status(200).json({ message: 'Event updated successfully' });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
+        }
+    });
 
 module.exports = router;
 
