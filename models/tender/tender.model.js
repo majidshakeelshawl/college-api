@@ -24,6 +24,9 @@ const tenderSchema = mongoose.Schema({
         type: Date,
         required: true,
     },
+    videoURL: {
+        type: String,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Tender', tenderSchema);

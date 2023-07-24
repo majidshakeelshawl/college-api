@@ -15,6 +15,9 @@ const notificationSchema = mongoose.Schema({
         data: Buffer,
         contentType: String,
     },
+    videoURL: {
+        type: String,
+    },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
