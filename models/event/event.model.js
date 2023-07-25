@@ -23,6 +23,10 @@ const eventSchema = mongoose.Schema({
         ref: 'User',
         required: true,
     },
+    eventDate: {
+        type: Date,
+        required: true,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', eventSchema);

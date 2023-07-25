@@ -20,9 +20,9 @@ router.post('/addEvent',
     requireAuth,
     upload.fields([{ name: 'image', maxCount: 1 }]),
     async (req, res) => {
-        const { title, body, videoURL } = req.body;
+        const { title, body, videoURL, eventDate } = req.body;
         try {
-            const event = new Event({ title, body, userId: req.user.userId, videoURL });
+            const event = new Event({ title, body, userId: req.user.userId, videoURL, eventDate });
 
             // Check if an image file was uploaded
             if (req.files && req.files.image && req.files.image[0]) {
@@ -56,6 +56,7 @@ router.get('/getAllEvents', async (req, res) => {
                 createdAt: event.createdAt,
                 updatedAt: event.updatedAt,
                 videoURL: event.videoURL,
+                eventDate: event.eventDate,
             };
 
             if (event.image.data !== undefined && event.image.data !== null) {
@@ -90,6 +91,7 @@ router.get('/getEvent/:eventId', async (req, res) => {
             createdAt: event.createdAt,
             updatedAt: event.updatedAt,
             videoURL: event.videoURL,
+            eventDate: event.eventDate,
         };
 
         if (event.image.data !== undefined && event.image.data !== null) {
@@ -126,7 +128,7 @@ router.delete('/deleteEvent/:eventId', requireAuth, async (req, res) => {
 router.put('/updateEvent/:eventId', requireAuth,
     upload.fields([{ name: 'image', maxCount: 1 }]),
     async (req, res) => {
-        const { title, body, videoURL } = req.body;
+        const { title, body, videoURL, eventDate } = req.body;
         try {
             const event = await Event.findById(req.params.eventId);
 
@@ -139,6 +141,9 @@ router.put('/updateEvent/:eventId', requireAuth,
                 event.body = body;
             if (videoURL)
                 event.videoURL = videoURL;
+            if (eventDate)
+                event.eventDate = eventDate;
+
 
             // Check if an image file was uploaded
             if (req.files && req.files.image && req.files.image[0]) {
