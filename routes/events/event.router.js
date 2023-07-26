@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const multer = require('multer');
+const moment = require('moment')
 // Multer configuration to handle image uploads
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -42,10 +43,22 @@ router.post('/addEvent',
         }
     }
 );
-
 router.get('/getAllEvents', async (req, res) => {
     try {
-        const events = await Event.find();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+
+        // Calculate the skip value based on the page number and items per page
+        const skip = (page - 1) * perPage;
+
+        // Fetch the total count of events
+        const totalCount = await Event.countDocuments();
+
+        // Fetch the events for the specified page using skip and limit
+        const events = await Event.find()
+            .skip(skip)
+            .limit(perPage)
+            .sort({ eventDate: -1 });
 
         const eventsWithMedia = events.map((event) => {
             const eventData = {
@@ -53,10 +66,8 @@ router.get('/getAllEvents', async (req, res) => {
                 title: event.title,
                 body: event.body,
                 userId: event.userId,
-                createdAt: event.createdAt,
-                updatedAt: event.updatedAt,
+                eventDate: moment.utc(event.eventDate).format('YYYY-MMMM-DD'),
                 videoURL: event.videoURL,
-                eventDate: event.eventDate,
             };
 
             if (event.image.data !== undefined && event.image.data !== null) {
@@ -68,7 +79,12 @@ router.get('/getAllEvents', async (req, res) => {
             return eventData;
         });
 
-        res.status(200).json({ events: eventsWithMedia });
+        res.status(200).json({
+            totalEvents: totalCount,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / perPage),
+            events: eventsWithMedia,
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Something went wrong' });

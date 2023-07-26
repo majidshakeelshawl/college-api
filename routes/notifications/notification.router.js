@@ -77,10 +77,10 @@ router.get('/getAllNotifications', async (req, res) => {
         });
 
         res.status(200).json({
-            notifications: notificationsWithImages,
             totalNotifications: totalCount,
             currentPage: page,
-            totalPages: Math.ceil(totalCount / perPage)
+            totalPages: Math.ceil(totalCount / perPage),
+            notifications: notificationsWithImages,
         });
     } catch (error) {
         console.error(error);
