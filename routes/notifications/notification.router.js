@@ -1,5 +1,6 @@
 const router = require('express').Router();
 const multer = require('multer');
+const moment = require('moment')
 // Multer configuration to handle image uploads
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -32,11 +33,21 @@ router.post('/createNotification', requireAuth, upload.single('image'), async (r
 
 router.get('/getAllNotifications', async (req, res) => {
     try {
-        const notifications = await Notification.find();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+
+        // Calculate the skip value based on the page number and items per page
+        const skip = (page - 1) * perPage;
+
+        // Fetch the total count of notifications
+        const totalCount = await Notification.countDocuments();
+
+        // Fetch the notifications for the specified page using skip and limit
+        const notifications = await Notification.find()
+            .skip(skip)
+            .limit(perPage);
 
         const notificationsWithImages = notifications.map((notification) => {
-            console.log("NOT: ", notification);
-            console.log("IMAGE ERROR: ", notification.image.data)
             if (notification.image.data !== undefined && notification.image.data !== null) {
                 const imageBuffer = Buffer.from(notification.image.data);
                 const imageWebSafe = `data:${notification.image.contentType};base64,${imageBuffer.toString('base64')}`;
@@ -48,8 +59,7 @@ router.get('/getAllNotifications', async (req, res) => {
                     body: notification.body,
                     userId: notification.userId,
                     image: imageWebSafe,
-                    createdAt: notification.createdAt,
-                    updatedAt: notification.updatedAt,
+                    date: moment.utc(notification.createdAt).format('YYYY-MMMM-DD'),
                     videoURL: notification.videoURL,
                 };
             }
@@ -60,19 +70,24 @@ router.get('/getAllNotifications', async (req, res) => {
                     body: notification.body,
                     userId: notification.userId,
                     image: null,
-                    createdAt: notification.createdAt,
-                    updatedAt: notification.updatedAt,
+                    date: moment.utc(notification.createdAt).format('YYYY-MMMM-DD'),
                     videoURL: notification.videoURL,
                 };
             }
         });
 
-        res.status(200).json({ notifications: notificationsWithImages });
+        res.status(200).json({
+            notifications: notificationsWithImages,
+            totalNotifications: totalCount,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / perPage)
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Something went wrong', errorMessage: error.message });
     }
 });
+
 
 router.delete('/deleteNotification/:id', requireAuth, async (req, res) => {
     try {
