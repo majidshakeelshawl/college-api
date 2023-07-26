@@ -33,11 +33,17 @@ router.post('/addTender', requireAuth, upload.single('image'), async (req, res) 
 
 router.get('/getAllTenders', async (req, res) => {
     try {
-        const tenders = await Tender.find();
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.perPage) || 10;
+        const startIndex = (page - 1) * perPage;
+        const endIndex = page * perPage;
+
+        const totalTenders = await Tender.countDocuments();
+        const totalPages = Math.ceil(totalTenders / perPage);
+
+        const tenders = await Tender.find().skip(startIndex).limit(perPage);
 
         const tendersWithImages = tenders.map((tender) => {
-            console.log("TENDER: ", tender);
-            console.log("IMAGE ERROR: ", tender.image.data)
             if (tender.image.data !== undefined && tender.image.data !== null) {
                 const imageBuffer = Buffer.from(tender.image.data);
                 const imageWebSafe = `data:${tender.image.contentType};base64,${imageBuffer.toString('base64')}`;
@@ -47,11 +53,8 @@ router.get('/getAllTenders', async (req, res) => {
                     _id: tender._id,
                     title: tender.title,
                     body: tender.body,
-                    userId: tender.userId,
                     tenderDate: tender.tenderDate,
                     image: imageWebSafe,
-                    createdAt: tender.createdAt,
-                    updatedAt: tender.updatedAt,
                     videoURL: tender.videoURL,
                 };
             }
@@ -60,17 +63,19 @@ router.get('/getAllTenders', async (req, res) => {
                     _id: tender._id,
                     title: tender.title,
                     body: tender.body,
-                    userId: tender.userId,
                     tenderDate: tender.tenderDate,
                     image: null,
-                    createdAt: tender.createdAt,
-                    updatedAt: tender.updatedAt,
                     videoURL: tender.videoURL,
                 };
             }
         });
 
-        res.status(200).json({ tenders: tendersWithImages });
+        res.status(200).json({
+            totalTenders: totalTenders,
+            totalPages: totalPages,
+            currentPage: page,
+            tenders: tendersWithImages
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Something went wrong' });
