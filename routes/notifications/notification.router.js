@@ -44,7 +44,6 @@ router.post('/createNotification', requireAuth, upload.single('image'), async (r
     const { title, body, videoURL } = req.body;
     try {
         const imageUrl = req.file ? req.file.filename : null; // Store the image filename (URL) in the database
-        console.log("DKJKDFJKIMAGE URL::::: ", imageUrl);
 
         const notification = new Notification({ title, body, userId: req.user.userId, videoURL, image: imageUrl });
         await notification.save();
@@ -139,8 +138,7 @@ router.put('/updateNotification/:id', requireAuth, upload.single('image'), async
             videoURL ? notification.videoURL = videoURL : null;
             if (req.file) {
                 // If an image is uploaded, set the image data and content type
-                notification.image.data = req.file.buffer;
-                notification.image.contentType = req.file.mimetype;
+                notification.image = req.file.filename;
             }
             await notification.save();
             res.status(200).json({ message: 'Notification updated successfully' });
