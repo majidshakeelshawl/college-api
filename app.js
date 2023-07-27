@@ -15,6 +15,8 @@ app.use(cors({
 
 // Serve static files from the "notification_images" directory
 app.use('/notification_images', express.static('./www/static/notifications'));
+app.use('/tender_images', express.static('./www/static/tenders'));
+app.use('/event_images', express.static('./www/static/events'));
 
 app.use(logger('dev'));
 app.use(express.json());

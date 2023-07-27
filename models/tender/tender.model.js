@@ -12,8 +12,7 @@ const tenderSchema = mongoose.Schema({
         minlength: 3,
     },
     image: {
-        data: Buffer,
-        contentType: String,
+        type: String,
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

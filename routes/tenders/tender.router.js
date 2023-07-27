@@ -2,7 +2,15 @@ const router = require('express').Router();
 const multer = require('multer');
 const moment = require('moment')
 // Multer configuration to handle image uploads
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'www/static/tenders');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    },
+});
 const upload = multer({ storage: storage });
 
 // Models
@@ -16,12 +24,10 @@ router.post('/addTender', requireAuth, upload.single('image'), async (req, res) 
     try {
         const tender = new Tender({ title, body, tenderDate, userId: req.user.userId, videoURL });
         if (req.file) {
-            tender.image.data = req.file.buffer;
-            tender.image.contentType = req.file.mimetype;
+            tender.image = req.file.filename;
         }
         else {
-            tender.image.data = null;
-            tender.image.contentType = null;
+            tender.image = null;
         }
         await tender.save();
 
@@ -45,9 +51,8 @@ router.get('/getAllTenders', async (req, res) => {
         const tenders = await Tender.find().skip(startIndex).limit(perPage);
 
         const tendersWithImages = tenders.map((tender) => {
-            if (tender.image.data !== undefined && tender.image.data !== null) {
-                const imageBuffer = Buffer.from(tender.image.data);
-                const imageWebSafe = `data:${tender.image.contentType};base64,${imageBuffer.toString('base64')}`;
+            if (tender.image !== undefined && tender.image !== null) {
+                const image = tender.image;
 
                 // Create a new object with tender data and the image URL
                 return {
@@ -111,8 +116,7 @@ router.put('/updateTender/:id', requireAuth, upload.single('image'), async (req,
             tenderDate ? tender.tenderDate = tenderDate : null;
             videoURL ? tender.videoURL = videoURL : null;
             if (req.file) {
-                tender.image.data = req.file.buffer;
-                tender.image.contentType = req.file.mimetype;
+                tender.image = req.file.filename;
             }
             await tender.save();
 
