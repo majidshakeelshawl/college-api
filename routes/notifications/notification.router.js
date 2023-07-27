@@ -1,8 +1,18 @@
 const router = require('express').Router();
 const multer = require('multer');
-const moment = require('moment')
+const moment = require('moment');
+const path = require('path');
+
 // Multer configuration to handle image uploads
-const storage = multer.memoryStorage();
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'www/static/notifications');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    },
+});
 const upload = multer({ storage: storage });
 
 // models
@@ -10,18 +20,33 @@ const Notification = require('../../models/notification/notification.model');
 
 const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
+// router.post('/createNotification', requireAuth, upload.single('image'), async (req, res) => {
+//     const { title, body, videoURL } = req.body;
+//     try {
+//         const notification = new Notification({ title, body, userId: req.user.userId, videoURL });
+//         if (req.file) {
+//             notification.image.data = req.file.buffer;
+//             notification.image.contentType = req.file.mimetype;
+//         }
+//         else {
+//             notification.image.data = null;
+//             notification.image.contentType = null;
+//         }
+//         await notification.save();
+
+//         res.status(201).json({ message: 'Notification created successfully' });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Something went wrong' });
+//     }
+// });
 router.post('/createNotification', requireAuth, upload.single('image'), async (req, res) => {
     const { title, body, videoURL } = req.body;
     try {
-        const notification = new Notification({ title, body, userId: req.user.userId, videoURL });
-        if (req.file) {
-            notification.image.data = req.file.buffer;
-            notification.image.contentType = req.file.mimetype;
-        }
-        else {
-            notification.image.data = null;
-            notification.image.contentType = null;
-        }
+        const imageUrl = req.file ? req.file.filename : null; // Store the image filename (URL) in the database
+        console.log("DKJKDFJKIMAGE URL::::: ", imageUrl);
+
+        const notification = new Notification({ title, body, userId: req.user.userId, videoURL, image: imageUrl });
         await notification.save();
 
         res.status(201).json({ message: 'Notification created successfully' });

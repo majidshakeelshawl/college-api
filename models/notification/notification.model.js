@@ -12,8 +12,7 @@ const notificationSchema = mongoose.Schema({
         minlength: 3,
     },
     image: {
-        data: Buffer,
-        contentType: String,
+        type: String,
     },
     videoURL: {
         type: String,
