@@ -1,15 +1,18 @@
 const router = require('express').Router();
 const multer = require('multer');
 const moment = require('moment')
+
 // Multer configuration to handle image uploads
-const storage = multer.memoryStorage();
-const upload = multer({
-    storage: storage,
-    limits: {
-        // Set the overall request size limit to 50MB
-        fileSize: 100 * 1024 * 1024, // 50MB in bytes
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'www/static/tenders');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
     },
 });
+const upload = multer({ storage: storage });
 
 
 // Models
@@ -19,19 +22,17 @@ const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 router.post('/addEvent',
     requireAuth,
-    upload.fields([{ name: 'image', maxCount: 1 }]),
+    upload.file('image'),
     async (req, res) => {
         const { title, body, videoURL, eventDate } = req.body;
         try {
             const event = new Event({ title, body, userId: req.user.userId, videoURL, eventDate });
 
             // Check if an image file was uploaded
-            if (req.files && req.files.image && req.files.image[0]) {
-                event.image.data = req.files.image[0].buffer;
-                event.image.contentType = req.files.image[0].mimetype;
+            if (req.file) {
+                event.image = req.file.filename;
             } else {
-                event.image.data = null;
-                event.image.contentType = null;
+                event.image = null;
             }
 
             await event.save();
@@ -65,15 +66,12 @@ router.get('/getAllEvents', async (req, res) => {
                 _id: event._id,
                 title: event.title,
                 body: event.body,
-                userId: event.userId,
                 eventDate: moment.utc(event.eventDate).format('YYYY-MMMM-DD'),
                 videoURL: event.videoURL,
             };
 
-            if (event.image.data !== undefined && event.image.data !== null) {
-                const imageBuffer = Buffer.from(event.image.data);
-                const imageWebSafe = `data:${event.image.contentType};base64,${imageBuffer.toString('base64')}`;
-                eventData.image = imageWebSafe;
+            if (event.image !== undefined && event.image !== null) {
+                event.image = event.image;
             }
 
             return eventData;
@@ -142,7 +140,7 @@ router.delete('/deleteEvent/:eventId', requireAuth, async (req, res) => {
 });
 
 router.put('/updateEvent/:eventId', requireAuth,
-    upload.fields([{ name: 'image', maxCount: 1 }]),
+    upload.file('image'),
     async (req, res) => {
         const { title, body, videoURL, eventDate } = req.body;
         try {
@@ -162,9 +160,8 @@ router.put('/updateEvent/:eventId', requireAuth,
 
 
             // Check if an image file was uploaded
-            if (req.files && req.files.image && req.files.image[0]) {
-                event.image.data = req.files.image[0].buffer;
-                event.image.contentType = req.files.image[0].mimetype
+            if (req.file) {
+                event.image = req.file.filename;
             }
 
             await event.save();
