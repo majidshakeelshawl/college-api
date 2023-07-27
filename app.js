@@ -13,6 +13,9 @@ app.use(cors({
     origin: '*'
 }));
 
+// Serve static files from the "notification_images" directory
+app.use('/notification_images', express.static('./www/static/notifications'));
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use('/admin', adminRouter);
