@@ -1,11 +1,12 @@
 const router = require('express').Router();
 const multer = require('multer');
 const moment = require('moment')
+const path = require('path');
 
 // Multer configuration to handle image uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'www/static/tenders');
+        cb(null, 'www/static/events');
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
@@ -22,7 +23,7 @@ const { requireAuth } = require('../../middlewares/auth/authMiddleware');
 
 router.post('/addEvent',
     requireAuth,
-    upload.file('image'),
+    upload.single('image'),
     async (req, res) => {
         const { title, body, videoURL, eventDate } = req.body;
         try {
@@ -71,7 +72,7 @@ router.get('/getAllEvents', async (req, res) => {
             };
 
             if (event.image !== undefined && event.image !== null) {
-                event.image = event.image;
+                eventData.image = `${process.env.PROD_URL}/event_images/${event.image}`;
             }
 
             return eventData;
@@ -140,7 +141,7 @@ router.delete('/deleteEvent/:eventId', requireAuth, async (req, res) => {
 });
 
 router.put('/updateEvent/:eventId', requireAuth,
-    upload.file('image'),
+    upload.single('image'),
     async (req, res) => {
         const { title, body, videoURL, eventDate } = req.body;
         try {

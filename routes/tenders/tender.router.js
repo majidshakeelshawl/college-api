@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const multer = require('multer');
 const moment = require('moment')
+const path = require('path');
 // Multer configuration to handle image uploads
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -60,7 +61,7 @@ router.get('/getAllTenders', async (req, res) => {
                     title: tender.title,
                     body: tender.body,
                     tenderDate: moment.utc(tender.tenderDate).format('YYYY-MMMM-DD'),
-                    image: imageWebSafe,
+                    image: `${process.env.PROD_URL}/tender_images/${tender.image}`,
                     videoURL: tender.videoURL,
                 };
             }
