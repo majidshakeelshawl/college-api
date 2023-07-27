@@ -73,17 +73,14 @@ router.get('/getAllNotifications', async (req, res) => {
             .limit(perPage);
 
         const notificationsWithImages = notifications.map((notification) => {
-            if (notification.image.data !== undefined && notification.image.data !== null) {
-                const imageBuffer = Buffer.from(notification.image.data);
-                const imageWebSafe = `data:${notification.image.contentType};base64,${imageBuffer.toString('base64')}`;
+            if (notification.image !== undefined) {
 
                 // Create a new object with notification data and the image URL
                 return {
                     _id: notification._id,
                     title: notification.title,
                     body: notification.body,
-                    userId: notification.userId,
-                    image: imageWebSafe,
+                    imageUrl: `${process.env.PROD_URL}/notification_images/${notification.image}`,
                     date: moment.utc(notification.createdAt).format('YYYY-MMMM-DD'),
                     videoURL: notification.videoURL,
                 };
@@ -93,8 +90,7 @@ router.get('/getAllNotifications', async (req, res) => {
                     _id: notification._id,
                     title: notification.title,
                     body: notification.body,
-                    userId: notification.userId,
-                    image: null,
+                    imageUrl: null,
                     date: moment.utc(notification.createdAt).format('YYYY-MMMM-DD'),
                     videoURL: notification.videoURL,
                 };
