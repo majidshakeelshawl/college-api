@@ -10,9 +10,8 @@ const tenderRouter = require('./routes/tenders/tender.router');
 const eventRouter = require('./routes/events/event.router');
 // middlewares
 app.use(cors({
-    origin: 'http://localhost:2001'
-}
-));
+    origin: '*'
+}));
 
 app.use(logger('dev'));
 app.use(express.json());
