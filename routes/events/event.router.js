@@ -157,7 +157,7 @@ router.put('/updateEvent/:eventId', requireAuth,
             if (videoURL)
                 event.videoURL = videoURL;
             if (eventDate)
-                event.eventDate = eventDate;
+                event.eventDate = new Date(eventDate);
 
 
             // Check if an image file was uploaded
