@@ -49,7 +49,8 @@ router.get('/getAllTenders', async (req, res) => {
         const totalTenders = await Tender.countDocuments();
         const totalPages = Math.ceil(totalTenders / perPage);
 
-        const tenders = await Tender.find().skip(startIndex).limit(perPage);
+        const tenders = await Tender.find().skip(startIndex).limit(perPage)
+            .sort({ createdAt: -1 });
 
         const tendersWithImages = tenders.map((tender) => {
             if (tender.image !== undefined && tender.image !== null) {

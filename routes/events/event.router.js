@@ -60,7 +60,7 @@ router.get('/getAllEvents', async (req, res) => {
         const events = await Event.find()
             .skip(skip)
             .limit(perPage)
-            .sort({ eventDate: -1 });
+            .sort({ createdAt: -1 });
 
         const eventsWithMedia = events.map((event) => {
             const eventData = {

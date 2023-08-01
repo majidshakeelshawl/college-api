@@ -69,7 +69,8 @@ router.get('/getAllNotifications', async (req, res) => {
         // Fetch the notifications for the specified page using skip and limit
         const notifications = await Notification.find()
             .skip(skip)
-            .limit(perPage);
+            .limit(perPage)
+            .sort({ createdAt: -1 });
 
         const notificationsWithImages = notifications.map((notification) => {
             if (notification.image !== undefined) {
