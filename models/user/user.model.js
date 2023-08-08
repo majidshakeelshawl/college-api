@@ -45,7 +45,7 @@ userSchema.statics.login = async function (email, password) {
         throw new Error("Invalid password or email");
 
     // sign and create jwt token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '3d' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '100y' });
 
     const loggedInUser = {
         name: user.name,
@@ -70,7 +70,7 @@ userSchema.statics.signUp = async function (email, password, name) {
     });
     console.log("JWT SECRETE:::::::::::::: ", process.env.JWT_SECRET)
     // sign and create jwt token
-    const token = await jwt.sign({ userId: createdUser._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+    const token = await jwt.sign({ userId: createdUser._id }, process.env.JWT_SECRET, { expiresIn: '100y' });
 
     const user = {
         name: createdUser.name,
