@@ -2,6 +2,13 @@ const express = require('express');
 const cors = require('cors');
 const logger = require('morgan');
 const app = express();
+const mongoose = require('mongoose');
+
+mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+});
+
 
 // Routes
 const adminRouter = require('./routes/admin/admin.router');
@@ -24,5 +31,15 @@ app.use('/admin', adminRouter);
 app.use('/admin/notifications', notificationRouter);
 app.use('/admin/tenders', tenderRouter);
 app.use('/admin/events', eventRouter);
-
+app.get('/files/:filename', (req, res) => {
+    const filename = req.params.filename;
+    const bucket = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
+        bucketName: 'uploads', // Change this to your bucket name
+    });
+    const downloadStream = bucket.openDownloadStreamByName(filename);
+    downloadStream.pipe(res);
+});
+app.get('/', (req, res) => {
+    res.send('Server running');
+});
 module.exports = app;

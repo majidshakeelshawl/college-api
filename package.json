@@ -19,7 +19,8 @@
     "moment": "^2.29.4",
     "mongoose": "^7.3.4",
     "morgan": "^1.10.0",
-    "multer": "^1.4.5-lts.1",
+    "multer": "^1.4.4",
+    "multer-gridfs-storage": "^5.0.2",
     "validator": "^13.9.0"
   }
 }

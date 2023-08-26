@@ -2,17 +2,19 @@ const router = require('express').Router();
 const multer = require('multer');
 const moment = require('moment')
 const path = require('path');
+const { GridFsStorage } = require('multer-gridfs-storage');
+
 // Multer configuration to handle image uploads
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'www/static/tenders');
-    },
-    filename: function (req, file, cb) {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+const storage = new GridFsStorage({
+    url: `${process.env.MONGO_URL}`,
+    file: (req, file) => {
+        return {
+            filename: `${file.originalname}_${Date.now()}`,
+            bucketName: 'uploads',
+        };
     },
 });
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
 // Models
 const Tender = require('../../models/tender/tender.model');
