@@ -73,7 +73,7 @@ router.get('/getAllEvents', async (req, res) => {
             };
 
             if (event.image !== undefined && event.image !== null) {
-                eventData.image = `${process.env.PROD_URL}/event_images/${event.image}`;
+                eventData.image = `${process.env.PROD_URL}/files/${event.image}`;
             }
 
             return eventData;

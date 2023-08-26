@@ -82,7 +82,7 @@ router.get('/getAllNotifications', async (req, res) => {
                     _id: notification._id,
                     title: notification.title,
                     body: notification.body,
-                    imageUrl: `${process.env.PROD_URL}/notification_images/${notification.image}`,
+                    imageUrl: `${process.env.PROD_URL}/files/${notification.image}`,
                     date: moment.utc(notification.createdAt).format('YYYY-MMMM-DD'),
                     videoURL: notification.videoURL,
                 };

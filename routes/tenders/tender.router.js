@@ -64,7 +64,7 @@ router.get('/getAllTenders', async (req, res) => {
                     title: tender.title,
                     body: tender.body,
                     tenderDate: moment.utc(tender.tenderDate).format('YYYY-MMMM-DD'),
-                    image: `${process.env.PROD_URL}/tender_images/${tender.image}`,
+                    image: `${process.env.PROD_URL}/files/${tender.image}`,
                     videoURL: tender.videoURL,
                 };
             }
