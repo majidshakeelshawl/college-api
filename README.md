@@ -48,18 +48,18 @@ Here’s a brief overview of the main API endpoints:
 
 - Events
 
-  - GET /api/events: Retrieve all events.
-  - POST /api/events: Create a new event.
-  - PUT /api/events/:id: Update an existing event.
-  - DELETE /api/events/:id: Delete an event.
+  - GET /admin/events/getAllEvents: Retrieve all events.
+  - POST /admin/deleteEvent/: Create a new event.
+  - PUT /admin/events/updateEvent/:id: Update an existing event.
+  - DELETE /admin/deleteEvent/:id: Delete an event.
 
 - Notifications
-  - GET /api/notifications: Retrieve all notifications.
-  - POST /api/notifications: Create a new notification.
+  - GET /admin/notifications/getAllNotifications?page=1&perPage=100: Retrieve all notifications.
+  - POST /admin/notifications/createNotification: Create a new notification.
 
 - Tenders
-  - GET /api/tenders: Retrieve all tenders.
-  - POST /api/tenders: Create a new tender.
+  - GET /admin/tenders/getAllTenders: Retrieve all tenders.
+  - POST /admin/tenders/addTender: Create a new tender.
  
  ## Environment Variables
 The following environment variables need to be set in the .env file:
