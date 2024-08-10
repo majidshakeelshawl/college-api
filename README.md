@@ -71,6 +71,5 @@ The following environment variables need to be set in the .env file:
 ## License
 This project is licensed under the GNU General Public License v3.0 (GPLv3). See the LICENSE file for details.
 
-**Summary**
-
+**Summary:**
 The GPLv3 license allows you to freely use, modify, and distribute this software, provided that any derivative works are also licensed under the GPLv3. This ensures that the software and its derivatives remain free and open-source.
